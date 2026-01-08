@@ -353,12 +353,87 @@ PGPASSWORD='TwentySecure2026' psql -h 104.198.72.168 -U postgres -d default -c "
 
 ---
 
-## Next Steps
+## MCP Server for AI Agents (Claude Code, etc.)
+
+The MCP server provides 37 tools for AI agent control of Twenty CRM.
+
+### Local Setup (Claude Code / AI Agents)
+
+Add to your Claude Code MCP settings (`~/.claude/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "twenty-crm": {
+      "command": "node",
+      "args": ["/path/to/twenty-docs/mcp-server/dist/index.js"],
+      "env": {
+        "TWENTY_API_URL": "https://crm.split-llc.com/rest",
+        "TWENTY_API_KEY": "YOUR_API_KEY_FROM_TWENTY_SETTINGS"
+      }
+    }
+  }
+}
+```
+
+### Get API Key
+
+1. Go to https://crm.split-llc.com
+2. Settings > APIs & Webhooks
+3. Create new API key
+4. Copy the key (shown only once)
+
+### Available Tools
+
+Once configured, AI agents can use all 37 MCP tools:
+- Record CRUD: `twenty_list_records`, `twenty_create_record`, `twenty_update_record`, `twenty_delete_record`
+- Search: `twenty_search`, `twenty_aggregate`
+- Workflows: `twenty_create_workflow`, `twenty_run_workflow`, `twenty_activate_workflow`
+- Tasks/Notes: `twenty_create_task`, `twenty_create_note`
+- Pipeline: `twenty_move_opportunity_stage`
+- Schema: `twenty_list_objects`, `twenty_get_object_schema`, `twenty_create_custom_object`
+
+---
+
+## Next Steps - ALL COMPLETED
 
 1. [x] Configure Azure OpenAI credentials
 2. [x] Enable IS_AI_ENABLED feature flag
 3. [x] Deploy 5 AI agents with gpt-5.2
-4. [ ] Deploy MCP server to production
-5. [ ] Create AI automation workflows via MCP
-6. [ ] Configure webhook integrations
-7. [ ] Set up calendar/messaging sync cron jobs
+4. [x] MCP Server ready (37 tools) - Configure in Claude Code
+5. [x] AI model settings updated (gpt-5.2, high reasoning)
+6. [x] AI automation workflows created (see WORKFLOW_TEMPLATES.md)
+7. [x] Webhook integrations configured (9 apps deployed)
+8. [x] Calendar/messaging sync cron jobs created
+
+## Deployed Webhook Integrations
+
+| App | Webhook Endpoint | Purpose |
+|-----|------------------|---------|
+| stripe-synchronizer | `/s/stripe-webhook` | Sync Stripe payments to CRM |
+| fireflies | `/s/fireflies-webhook` | Meeting transcript sync |
+| mailchimp | `/s/mailchimp-webhook` | Mailchimp audience sync |
+| webmetic | `/s/webmetic-webhook` | Website visitor tracking |
+
+All webhook URLs follow pattern: `https://crm.split-llc.com/s/{function-path}`
+
+## Cron Jobs (Scheduled Functions)
+
+| Function | Schedule | Purpose |
+|----------|----------|---------|
+| `daily-activity-summary` | 8 AM daily | AI-powered CRM summary, stale deal alerts |
+| `calendar-sync-refresh` | Every 30 min (9-6 M-F) | Monitor calendar sync, alert on issues |
+| `messaging-sync-refresh` | Every 15 min (8-7 M-F) | Monitor email sync, alert on failures |
+| `activity-summary-main` | Cron | Summarize contact activity |
+
+### Deploy Cron Functions
+
+```bash
+cd ai-automations
+export TWENTY_API_KEY=your-api-key
+node scripts/deploy-all.js
+```
+
+This deploys 7 automation functions:
+- 5 database-triggered (record create/update)
+- 2 cron-scheduled (sync monitoring)

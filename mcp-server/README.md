@@ -108,6 +108,55 @@ Add to your Claude Code MCP settings:
 }
 ```
 
+## Transport Options
+
+### 1. Stdio Transport (Local AI Agents - Claude Code, etc.)
+
+For local AI agent use with stdio transport:
+
+```bash
+npm start  # or: node dist/index.js
+```
+
+### 2. HTTP/SSE Transport (Remote/Production)
+
+For production deployment with HTTP Server-Sent Events:
+
+```bash
+npm run start:http  # or: node dist/http-server.js
+```
+
+**Endpoints:**
+- `GET /` or `GET /health` - Health check
+- `GET /sse` - SSE endpoint for MCP connections
+- `POST /message` - Message endpoint for SSE transport
+
+## Production Deployment (Cloud Run)
+
+### Quick Deploy
+
+```bash
+# Build and push Docker image
+docker build -t gcr.io/split-12-08-25/twenty-mcp-server .
+docker push gcr.io/split-12-08-25/twenty-mcp-server
+
+# Deploy to Cloud Run
+gcloud run deploy twenty-mcp-server \
+  --image gcr.io/split-12-08-25/twenty-mcp-server \
+  --region us-central1 \
+  --platform managed \
+  --allow-unauthenticated \
+  --port 3001 \
+  --set-env-vars "TWENTY_API_URL=https://crm.split-llc.com/rest" \
+  --set-secrets "TWENTY_API_KEY=twenty-api-key:latest"
+```
+
+### Production URL
+
+Once deployed: `https://twenty-mcp-server-XXXXX.us-central1.run.app`
+
+**SSE Connection:** `https://twenty-mcp-server-XXXXX.us-central1.run.app/sse`
+
 ## Example Conversations
 
 **User:** "Create a new company called Acme Corp"
@@ -124,3 +173,12 @@ Add to your Claude Code MCP settings:
 
 **User:** "Create a workflow that sends welcome email when company is created"
 **AI uses:** `twenty_create_workflow` with trigger and action configuration
+
+## Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `TWENTY_API_URL` | Yes | `https://crm.split-llc.com/rest` | Twenty CRM REST API URL |
+| `TWENTY_API_KEY` | Yes | - | Twenty API key from Settings > APIs |
+| `PORT` | No | `3001` | HTTP server port |
+| `HOST` | No | `0.0.0.0` | HTTP server host |

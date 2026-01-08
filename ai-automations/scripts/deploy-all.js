@@ -45,6 +45,16 @@ const FUNCTIONS = [
     name: 'daily-activity-summary',
     file: 'daily-activity-summary.ts',
     description: 'Generates daily AI-powered summaries of CRM activity'
+  },
+  {
+    name: 'calendar-sync-refresh',
+    file: 'calendar-sync-refresh.ts',
+    description: 'Monitors calendar sync status and alerts on issues (every 30 min)'
+  },
+  {
+    name: 'messaging-sync-refresh',
+    file: 'messaging-sync-refresh.ts',
+    description: 'Monitors email/messaging sync status and alerts on failures (every 15 min)'
   }
 ];
 
